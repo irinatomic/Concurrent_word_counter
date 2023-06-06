@@ -5,9 +5,9 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "main.h"
+#include "map.h"
 
-#define MAX_WORD_LEN  64             //longest word length with \0
-#define MAX_THREADS   20
+HashMap mapa;
 
 void* main_thread_work(){
 
@@ -42,11 +42,6 @@ void* main_thread_work(){
     for(int i = 0; i < MAX_THREADS; i++){
         pthread_join(threads[i], NULL);
     }
-}
-
-void map_init(){
-
-
 }
 
 void *scanner_work(void *_args){
@@ -90,20 +85,16 @@ void go_through_file(void *_args, int prev_length){
 
 }
 
-search_result* map_get_frequency(char *word){
-
-    return NULL;
-}
-
 int main(){
 
-    pthread_t main_thread;
+    //init the hash map
+    map_init();
 
-    // start the main thread
-    pthread_create(&main_thread, NULL, main_thread_work, NULL);
-    
-    // wait for main thread to finish
+    //main thread
+    pthread_t main_thread;
+    pthread_create(&main_thread, NULL, main_thread_work, NULL);    
     pthread_join(main_thread, NULL);
+
     return 0;
 }
 
