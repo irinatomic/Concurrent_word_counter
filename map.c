@@ -22,16 +22,34 @@ int hash(const char* key) {
 void map_add_word(char* key, int value) {
 
     unsigned int index = hash(key);
+    Node* current = mapa.array[index];
+    Node* prev = NULL;
 
+    // Search for the existing word in the linked list
+    while (current != NULL) {
+        if (strcmp(current->key, key) == 0) {
+            current->value += value;                    //word exists, update the value
+            return;
+        }
+        prev = current;
+        current = current->next;
+    }
+
+    // Word does not exist, create a new node and insert it at the beginning of the linked list
     Node* new_node = malloc(sizeof(Node));
-    new_node->key = strdup(key);                    // Make a copy of the key
+    new_node->key = strdup(key);
     new_node->value = value;
     new_node->next = NULL;
 
-    // Insert the new node at the beginning of the linked list
-    new_node->next = mapa.array[index];
-    mapa.array[index] = new_node;
+    if (prev == NULL) {
+        // The linked list is empty, make the new node the first node
+        mapa.array[index] = new_node;
+    } else {
+        // Insert the new node at the beginning of the linked list
+        prev->next = new_node;
+    }
 }
+
 
 int map_get_frequency(const char* key) {
 
