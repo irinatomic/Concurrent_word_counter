@@ -4,12 +4,10 @@
 #include <unistd.h>
 #include "map.h"
 
-extern HashMap mapa;
-
 int hash(const char* key) {
 
     unsigned int hash_value = 0;
-    int prime = 31;        //prime number for better distribution
+    int prime = 31;                                     //prime number for better distribution
 
     while (*key != '\0') {
         hash_value = (hash_value * prime) + (*key);
@@ -19,10 +17,10 @@ int hash(const char* key) {
     return hash_value % ARRAY_SIZE;
 }
 
-void map_add_word(char* key, int value) {
+void map_add_word(HashMap* mapa, char* key, int value) {
 
     unsigned int index = hash(key);
-    Node* current = mapa.array[index];
+    Node* current = mapa->array[index];
     Node* prev = NULL;
 
     // Search for the existing word in the linked list
@@ -41,38 +39,35 @@ void map_add_word(char* key, int value) {
     new_node->value = value;
     new_node->next = NULL;
 
-    if (prev == NULL) {
-        // The linked list is empty, make the new node the first node
-        mapa.array[index] = new_node;
-    } else {
-        // Insert the new node at the beginning of the linked list
-        prev->next = new_node;
-    }
+    if (prev == NULL)
+        mapa->array[index] = new_node;                  // linked list is empty, make the new node the first node
+    else
+        prev->next = new_node;                          // insert the new node at the beginning of the linked list
 }
 
-
-int map_get_frequency(const char* key) {
+search_result* map_get_frequency(HashMap* map, const char* key) {
+    search_result* result = malloc(sizeof(search_result));
+    result->key = NULL;
+    result->frequency = -1;
 
     unsigned int index = hash(key);
-
-    Node* current = mapa.array[index];
+    Node* current = map->array[index];
 
     while (current != NULL) {
         if (strcmp(current->key, key) == 0) {
-            return current->value;
+            result->key = current->key;
+            result->frequency = current->value;
+            break;
         }
         current = current->next;
     }
 
-    // not found
-    return -1;   
+    return result;
 }
 
-void map_init() {
+void map_init(HashMap* mapa) {
 
     for (int i = 0; i < ARRAY_SIZE; i++) {
-        mapa.array[i] = NULL;
+        mapa->array[i] = NULL;
     }
 }
-
-

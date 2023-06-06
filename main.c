@@ -34,7 +34,7 @@ void* main_thread_work(){
             break;
         
         else {
-            search_result* res = map_get_frequency(token);
+            search_result* res = map_get_frequency(&mapa, token);
             printf("%s: %d \n", token, res->frequency);
         }                                              
     }
@@ -81,14 +81,42 @@ void go_through_file(void *_args, int prev_length){
     char file_name[256];
     strcpy(file_name, args->file_name);
 
+    FILE* file = fopen(file_name, "r");
+    if (file == NULL) {
+        printf("Failed to open file: %s\n", file_name);
+        return;
+    }
+    
+    fseek(file, prev_length, SEEK_SET);
 
+    HashMap temp_map;
+    map_init(&temp_map);                            //temp map for words and their frequencies in file
 
+    char word[MAX_WORD_LEN];
+    while (fscanf(file, "%s", word) == 1) {
+        map_add_word(&temp_map, word, 1);
+    }
+
+    fclose(file);
+
+    // Merge the temporary map with the main map
+    merge_maps(&mapa, &temp_map);
+}
+
+void merge_maps(HashMap* main_map, HashMap* temp_map) {
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        Node* current = temp_map->array[i];
+        while (current != NULL) {
+            map_add_word(main_map, current->key, current->value);
+            current = current->next;
+        }
+    }
 }
 
 int main(){
 
     //init the hash map
-    map_init();
+    map_init(&mapa);
 
     //main thread
     pthread_t main_thread;
@@ -97,4 +125,3 @@ int main(){
 
     return 0;
 }
-
