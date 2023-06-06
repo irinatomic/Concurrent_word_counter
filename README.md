@@ -8,3 +8,9 @@ From the terminal:
 1. compile code: gcc main.c map.c -o program
 2. run code: ./program
 
+To-do:
+1. check a word:
+    - valid                 ✓
+    - not a stop word
+2. end all the threads when the main thread wants to end ✓
+3. block a part of the HashMap when I someone is accessing/modifying it

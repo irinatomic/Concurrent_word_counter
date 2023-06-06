@@ -4,10 +4,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <ctype.h>
 #include "main.h"
 #include "map.h"
 
 HashMap mapa;
+int exit_thread;
 
 void* main_thread_work(){
 
@@ -17,6 +19,7 @@ void* main_thread_work(){
     struct file arguments[MAX_THREADS];      // max 20 arguments for 2 threads
     pthread_t threads[MAX_THREADS];          // max 20 threads
     int k = 0;
+    exit_thread = 0;
 
     while(fgets(input, sizeof(input), stdin) != NULL) {  
 
@@ -24,14 +27,16 @@ void* main_thread_work(){
         char* token = strtok(input, " ");
 
         if(strcmp(token, "_count_") == 0){
-
+            
             // token = strtok(NULL, " ");
             // arguments[k] = (struct file) {token, NULL, 0};
             // pthread_create(&threads[k], NULL, scanner_work, (void*) (arguments + k));
             // k++;
 
-        } else if(strcmp(token, "_stop_") == 0)
+        } else if(strcmp(token, "_stop_") == 0){
+            exit_thread = 1;
             break;
+        }
         
         else {
             search_result* res = map_get_frequency(&mapa, token);
@@ -57,7 +62,10 @@ void *scanner_work(void *_args){
     go_through_file(args, 0);               // first time we go through the whole file
 
     while(1){
-        
+
+        if(exit_thread == 1)
+            pthread_exit(NULL);
+    
         struct stat fileStat;
         stat(filename, &fileStat);
         time_t mod_time = fileStat.st_mtime;
@@ -93,7 +101,11 @@ void go_through_file(void *_args, int prev_length){
     map_init(&temp_map);                            //temp map for words and their frequencies in file
 
     char word[MAX_WORD_LEN];
-    while (fscanf(file, "%s", word) == 1) {
+    while (fscanf(file, "%s", word) == 1) {         //fscanf uses whitespace chars as delimiters (' ', \t, \n)
+        for (int i = 0; word[i] != '\0'; i++) {
+            if(word[i] >= 0 && word[i] <= 9) continue;
+            word[i] = tolower(word[i]);
+        }
         map_add_word(&temp_map, word, 1);
     }
 
@@ -101,6 +113,7 @@ void go_through_file(void *_args, int prev_length){
 
     // Merge the temporary map with the main map
     merge_maps(&mapa, &temp_map);
+    sleep(5);
 }
 
 void merge_maps(HashMap* main_map, HashMap* temp_map) {

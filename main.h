@@ -11,6 +11,7 @@ typedef struct file {
 	char file_name[256]; 
 	time_t mod_time; 
     int length;
+	int* exit_thread;
 } scanned_file;
 
 
