@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/irinatomic/Documents/RAF/4. semestar/OS/OS_domaci4",
+      "program": "/Users/irinatomic/Documents/RAF/4. semestar/OS/OS_domaci4/build/Debug/outDebug"
+    }
+  ]
+}
