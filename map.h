@@ -18,9 +18,9 @@ typedef struct HashMap {
     Node* array[ARRAY_SIZE];
 } HashMap;
 
-extern int hash(const char* key);
+extern int hash(char* key);
 extern void map_init(HashMap* map);
 extern void map_add_word(HashMap* mapa, char* key, int value);
-extern search_result* map_get_frequency(HashMap* map, const char* key);
+extern search_result* map_get_frequency(HashMap* map, char* key);
 
 #endif

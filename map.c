@@ -4,9 +4,17 @@
 #include <unistd.h>
 #include "map.h"
 
-int hash(const char* key) {
+int hash(char* key) {
 
-    unsigned int hash_value = 0;
+    //pretvori sva slova u mala
+    char* temp = key;
+    while(*temp != '\0'){
+        if(*temp >= 'A' && *temp <= 'Z')
+            *temp = *temp + ('a' - 'A');
+        temp++;
+    }
+
+    int hash_value = 0;
     int prime = 31;                                     //prime number for better distribution
 
     while (*key != '\0') {
@@ -45,12 +53,14 @@ void map_add_word(HashMap* mapa, char* key, int value) {
         prev->next = new_node;                          // insert the new node at the beginning of the linked list
 }
 
-search_result* map_get_frequency(HashMap* map, const char* key) {
+
+search_result* map_get_frequency(HashMap* map, char* key) {
+
     search_result* result = malloc(sizeof(search_result));
     result->key = NULL;
     result->frequency = -1;
 
-    unsigned int index = hash(key);
+    int index = hash(key);
     Node* current = map->array[index];
 
     while (current != NULL) {

@@ -38,9 +38,19 @@ void* main_thread_work(){
             break;
         }
         
-        else {
-            search_result* res = map_get_frequency(&mapa, token);
-            printf("%s: %d \n", token, res->frequency);
+        else {  
+
+            char* prev_token = token;
+            while(token != NULL){
+                prev_token = token;
+                token = strtok(NULL, " ");
+            }
+
+            search_result* res = map_get_frequency(&mapa, prev_token);
+            if(res->frequency == -1)
+                printf("Word %s does not exist\n", prev_token);
+            else
+                printf("%s: %d \n", prev_token, res->frequency);
         }                                              
     }
 
@@ -74,7 +84,7 @@ void *scanner_work(void *_args){
 
             args->mod_time = mod_time;
             args->length = fileStat.st_size;
-            go_through_file(_args, prev_length);
+            go_through_file(args, prev_length);
             prev_mod_time = mod_time;
             prev_length = fileStat.st_size;
         }
@@ -103,8 +113,7 @@ void go_through_file(void *_args, int prev_length){
     char word[MAX_WORD_LEN];
     while (fscanf(file, "%s", word) == 1) {         //fscanf uses whitespace chars as delimiters (' ', \t, \n)
         for (int i = 0; word[i] != '\0'; i++) {
-            if(word[i] >= 0 && word[i] <= 9) continue;
-            word[i] = tolower(word[i]);
+            if(!isalpha(word[i])) continue;
         }
         map_add_word(&temp_map, word, 1);
     }
