@@ -23,8 +23,9 @@ void* main_thread_work(){
         if(strcmp(token, "_count_") == 0){
             
             token = strtok(NULL, " ");
+            printf("TOKEN %s\n", token);
             arguments[k] = (struct file) {token, NULL, 0};
-            pthread_create(&threads[k], NULL, scanner_work, (void*) (arguments + k));
+            pthread_create(threads + k, NULL, scanner_work, (void*) (arguments + k));
             k++;
 
         } else if(strcmp(token, "_stop_") == 0){
@@ -60,42 +61,42 @@ void *scanner_work(void *_args){
 
     struct file *args = (struct file *) _args;
     char* filename = args->file_name;
+        printf("FILE NAME %s\n", filename);
+
+    filename[strlen(filename)] = '\0';
+        printf("FILE NAME %s\n", filename);
+
 
     struct stat fileStat;
     stat(filename, &fileStat);
-    time_t prev_mod_time = fileStat.st_mtime;
-    int prev_length = fileStat.st_size;
+    args->mod_time = fileStat.st_mtime;
+    args->length = fileStat.st_size;
 
-    go_through_file(args, 0);               // first time we go through the whole file
+    go_through_file(args, 0);            // First time we go through the whole file
+    sleep(5);
 
-    while(1){
-
-        if(exit_thread == 1)
+    while (1) {
+        if (exit_thread == 1)
             pthread_exit(NULL);
-    
-        struct stat fileStat;
+
         stat(filename, &fileStat);
-        time_t mod_time = fileStat.st_mtime;
 
-        if(prev_mod_time != mod_time){
-
-            args->mod_time = mod_time;
+        if (args->mod_time != fileStat.st_mtime) {
+            printf("Duzina %d\n", fileStat.st_size);
+            args->mod_time = fileStat.st_mtime;
+            go_through_file(args, args->length);
             args->length = fileStat.st_size;
-            go_through_file(args, prev_length);
-            prev_mod_time = mod_time;
-            prev_length = fileStat.st_size;
         }
 
-        sleep(5);                             // sleep 5 seconds
+        sleep(5);                                   // Sleep for 5 seconds
     }
 }
 
-void go_through_file(void *_args, int prev_length){
+void go_through_file(struct file* args, int prev_length){
 
-    struct file *args = (struct file *) _args;
-    char file_name[256];
-    strcpy(file_name, args->file_name);
-
+    char* file_name = args->file_name;
+    file_name[strlen(file_name)] = '\0';
+    printf("FILE NAME %s\n", file_name);
     FILE* file = fopen(file_name, "r");
     if (file == NULL) {
         printf("Failed to open file: %s\n", file_name);
@@ -132,7 +133,6 @@ void go_through_file(void *_args, int prev_length){
 
     // Merge the temporary map with the main map
     merge_maps(&mapa, &temp_map);
-    sleep(5);
 }
 
 void merge_maps(HashMap* main_map, HashMap* temp_map) {

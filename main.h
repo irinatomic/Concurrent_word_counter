@@ -17,7 +17,6 @@ typedef struct file {
 	char* file_name; 
 	time_t mod_time; 
     int length;
-	int* exit_thread;
 } scanned_file;
 
 
@@ -26,7 +25,7 @@ extern void* main_thread_work();
 
 // scanner thread
 extern void *scanner_work(void *_args);
-extern void go_through_file(void *_args, int prev_length);
+extern void go_through_file(struct file* args, int prev_length);
 extern void merge_maps(HashMap* main_map, HashMap* temp_map);
 
 // our mutex
