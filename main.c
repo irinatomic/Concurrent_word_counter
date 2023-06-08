@@ -20,12 +20,12 @@ void* main_thread_work(){
     pthread_t threads[MAX_THREADS];          // max 20 threads
     int k = 0;
     exit_thread = 0;
-    char* filename;
+    char* token;
 
     while(fgets(input, sizeof(input), stdin) != NULL) {  
 
         input[strcspn(input, "\n")] = '\0';
-        char* token = strtok(input, " ");
+        token = strtok(input, " ");
 
         if(strcmp(token, "_count_") == 0){
             
@@ -41,8 +41,6 @@ void* main_thread_work(){
         
         else {  
 
-            printf("TRAZIMO REC %s \n", input);
-
             char* prev_token = token;
             while(token != NULL){
                 prev_token = token;
@@ -53,7 +51,10 @@ void* main_thread_work(){
             if(res->frequency == -1)
                 printf("Word %s does not exist\n", prev_token);
             else
-                printf("%s: %d \n", prev_token, res->frequency);
+                printf("Word %s: frequency %d \n", prev_token, res->frequency);
+
+            token = NULL;
+            input[0] = '\n';
         }                                              
     }
 
@@ -113,7 +114,7 @@ void go_through_file(void *_args, int prev_length){
     HashMap temp_map;
     map_init(&temp_map);                            //temp map for words and their frequencies in file
 
-    char line[2000];
+    char line[4096];
     char word[MAX_WORD_LEN];
     while (fgets(line, sizeof(line), file) != NULL) {
         int length = strlen(line);

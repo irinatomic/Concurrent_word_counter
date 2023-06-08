@@ -14,15 +14,13 @@ int hash(char* key) {
         temp++;
     }
 
-    int hash_value = 0;
-    int prime = 31;                                     //prime number for better distribution -> name
+    unsigned long hash = 5381;                  // Dan bernstein (djb2): http://www.cse.yorku.ca/~oz/hash.html
+    int c;
 
-    while (*key != '\0') {
-        hash_value = (hash_value * prime) + (*key);
-        key++;
-    }
+    while (c = *key++)
+        hash = ((hash << 5) + hash) + c;        /* hash * 33 + c */
 
-    return hash_value % ARRAY_SIZE;
+    return hash % ARRAY_SIZE;
 }
 
 void map_add_word(HashMap* mapa, char* key, int value) {
