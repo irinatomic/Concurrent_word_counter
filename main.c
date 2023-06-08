@@ -20,6 +20,7 @@ void* main_thread_work(){
     pthread_t threads[MAX_THREADS];          // max 20 threads
     int k = 0;
     exit_thread = 0;
+    char* filename;
 
     while(fgets(input, sizeof(input), stdin) != NULL) {  
 
@@ -28,10 +29,10 @@ void* main_thread_work(){
 
         if(strcmp(token, "_count_") == 0){
             
-            // token = strtok(NULL, " ");
-            // arguments[k] = (struct file) {token, NULL, 0};
-            // pthread_create(&threads[k], NULL, scanner_work, (void*) (arguments + k));
-            // k++;
+            token = strtok(NULL, " ");
+            arguments[k] = (struct file) {token, NULL, 0};
+            pthread_create(&threads[k], NULL, scanner_work, (void*) (arguments + k));
+            k++;
 
         } else if(strcmp(token, "_stop_") == 0){
             exit_thread = 1;
@@ -39,6 +40,8 @@ void* main_thread_work(){
         }
         
         else {  
+
+            printf("TRAZIMO REC %s \n", input);
 
             char* prev_token = token;
             while(token != NULL){
@@ -110,15 +113,28 @@ void go_through_file(void *_args, int prev_length){
     HashMap temp_map;
     map_init(&temp_map);                            //temp map for words and their frequencies in file
 
+    char line[2000];
     char word[MAX_WORD_LEN];
-    while (fscanf(file, "%s", word) == 1) {         //fscanf uses whitespace chars as delimiters (' ', \t, \n)
-        for (int i = 0; word[i] != '\0'; i++) {
-            if(!isalpha(word[i])) continue;
+    while (fgets(line, sizeof(line), file) != NULL) {
+        int length = strlen(line);
+        if (line[length - 1] == '\n') {
+            line[length - 1] = '\0';                // Remove the newline character at the end
         }
-        map_add_word(&temp_map, word, 1);
-    }
 
-    fclose(file);
+        char* token = strtok(line, " ");
+        while (token != NULL) {
+            int i = 0;
+            while (token[i] != '\0') {
+                if (isalpha(token[i])) {
+                    map_add_word(&temp_map, token, 1);
+                    printf("REC %s\n", token);
+                    break;
+                }
+                i++;
+            }
+            token = strtok(NULL, " ");
+        }
+    }
 
     // Merge the temporary map with the main map
     merge_maps(&mapa, &temp_map);

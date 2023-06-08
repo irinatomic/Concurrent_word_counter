@@ -8,7 +8,7 @@
 #define MAX_THREADS     20
 
 typedef struct file {
-	char file_name[256]; 
+	char* file_name; 
 	time_t mod_time; 
     int length;
 	int* exit_thread;

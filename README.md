@@ -15,3 +15,5 @@ To-do:
 2. end all the threads when the main thread wants to end ✓
 3. block a part of the HashMap when I someone is accessing/modifying it
 4. Take the last word when user inputs words for search ✓
+5. ctrl + d
+6. lista obradjenih fajlova

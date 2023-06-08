@@ -15,7 +15,7 @@ int hash(char* key) {
     }
 
     int hash_value = 0;
-    int prime = 31;                                     //prime number for better distribution
+    int prime = 31;                                     //prime number for better distribution -> name
 
     while (*key != '\0') {
         hash_value = (hash_value * prime) + (*key);
