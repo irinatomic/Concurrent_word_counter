@@ -1,10 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <ctype.h>
 #include "main.h"
 #include "map.h"
 
@@ -154,6 +147,9 @@ void merge_maps(HashMap* main_map, HashMap* temp_map) {
 
 int main(){
 
+    //init mutex
+    pthread_mutex_init(&map_mutex, NULL);
+
     //init the hash map
     map_init(&mapa);
 
@@ -161,6 +157,9 @@ int main(){
     pthread_t main_thread;
     pthread_create(&main_thread, NULL, main_thread_work, NULL);    
     pthread_join(main_thread, NULL);
+
+    //destroy mutex
+    pthread_mutex_destroy(&map_mutex);
 
     return 0;
 }

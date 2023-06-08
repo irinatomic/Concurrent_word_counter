@@ -1,6 +1,11 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #define ARRAY_SIZE      5011
 
 typedef struct search_result {

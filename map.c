@@ -1,7 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#include "main.h"
 #include "map.h"
 
 int hash(char* key) {
@@ -32,7 +29,9 @@ void map_add_word(HashMap* mapa, char* key, int value) {
     // Search for the existing word in the linked list
     while (current != NULL) {
         if (strcmp(current->key, key) == 0) {
+            pthread_mutex_lock(&map_mutex);             //mutex lock
             current->value += value;                    //word exists, update the value
+            pthread_mutex_unlock(&map_mutex);           //mutex unlock
             return;
         }
         prev = current;
@@ -63,8 +62,10 @@ search_result* map_get_frequency(HashMap* map, char* key) {
 
     while (current != NULL) {
         if (strcmp(current->key, key) == 0) {
+            pthread_mutex_lock(&map_mutex);                          //mutex lock
             result->key = current->key;
             result->frequency = current->value;
+            pthread_mutex_unlock(&map_mutex);                        //mutex unlock
             break;
         }
         current = current->next;
