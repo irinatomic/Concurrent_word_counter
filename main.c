@@ -9,8 +9,8 @@ void* main_thread_work(){
     char input[MAX_WORD_LEN];
     unsigned int len;
 
-    struct file arguments[MAX_THREADS];      // max 20 arguments for 2 threads
-    pthread_t threads[MAX_THREADS];          // max 20 threads
+    struct file arguments[MAX_THREADS] = malloc(MAX_THREADS * sizeof(struct file));         // max 20 arguments for 20 threads
+    pthread_t threads[MAX_THREADS];                                                         // max 20 threads
     int k = 0;
     exit_thread = 0;
     char* token;
@@ -23,9 +23,8 @@ void* main_thread_work(){
         if(strcmp(token, "_count_") == 0){
             
             token = strtok(NULL, " ");
-            printf("TOKEN %s\n", token);
             arguments[k] = (struct file) {token, NULL, 0};
-            pthread_create(threads + k, NULL, scanner_work, (void*) (arguments + k));
+            pthread_create(&threads[k], NULL, scanner_work, (void*) (arguments + k));
             k++;
 
         } else if(strcmp(token, "_stop_") == 0){
@@ -61,45 +60,40 @@ void *scanner_work(void *_args){
 
     struct file *args = (struct file *) _args;
     char* filename = args->file_name;
-        printf("FILE NAME %s\n", filename);
-
     filename[strlen(filename)] = '\0';
-        printf("FILE NAME %s\n", filename);
 
+    struct stat fileStat0;
+    stat(filename, &fileStat0);
+    time_t mod_time = fileStat0.st_mtime;
+    int prev_len = fileStat0.st_size;
 
-    struct stat fileStat;
-    stat(filename, &fileStat);
-    args->mod_time = fileStat.st_mtime;
-    args->length = fileStat.st_size;
-
-    go_through_file(args, 0);            // First time we go through the whole file
+    go_through_file(filename, 0);            // First time we go through the whole file
     sleep(5);
 
     while (1) {
         if (exit_thread == 1)
             pthread_exit(NULL);
 
+        struct stat fileStat;
         stat(filename, &fileStat);
 
-        if (args->mod_time != fileStat.st_mtime) {
-            printf("Duzina %d\n", fileStat.st_size);
-            args->mod_time = fileStat.st_mtime;
-            go_through_file(args, args->length);
-            args->length = fileStat.st_size;
+        if (mod_time != fileStat.st_mtime && prev_len < fileStat.st_size) {
+            //printf("Duzina %d %d %s %s\n", prev_len, fileStat.st_size, filename, args->file_name);
+            mod_time = fileStat.st_mtime;
+            go_through_file(filename, prev_len);
+            prev_len = fileStat.st_size;
         }
 
         sleep(5);                                   // Sleep for 5 seconds
     }
 }
 
-void go_through_file(struct file* args, int prev_length){
+void go_through_file(char* filename, int prev_length){
 
-    char* file_name = args->file_name;
-    file_name[strlen(file_name)] = '\0';
-    printf("FILE NAME %s\n", file_name);
-    FILE* file = fopen(file_name, "r");
+    filename[strlen(filename)] = '\0';
+    FILE* file = fopen(filename, "r");
     if (file == NULL) {
-        printf("Failed to open file: %s\n", file_name);
+        printf("Failed to open file: %s\n", filename);
         return;
     }
     
@@ -130,6 +124,7 @@ void go_through_file(struct file* args, int prev_length){
             token = strtok(NULL, " ");
         }
     }
+    free(line);
 
     // Merge the temporary map with the main map
     merge_maps(&mapa, &temp_map);
