@@ -161,7 +161,7 @@ void go_through_file(char* filename, int prev_length){
             while (token[i] != '\0') {
                 if (isalpha(token[i]) && stopwords_cointains(&stopWords, token) == 0) {
                     map_add_word(&temp_map, token, 1);
-                    printf("REC %s\n", token);
+                    // printf("REC %s\n", token);
                     break;
                 }
                 i++;

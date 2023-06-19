@@ -31,4 +31,7 @@ extern void merge_maps(HashMap* main_map, HashMap* temp_map);
 pthread_mutex_t map_mutex;
 pthread_mutex_t stopwords_mutex;
 
+// stopwords
+extern void add_stopwords(char* filename);
+
 #endif 
