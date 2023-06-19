@@ -2,12 +2,15 @@
 #include "map.h"
 
 HashMap mapa;
+HashMap stopWords;
 int exit_thread;
+char filesArray[MAX_FILES][MAX_FILENAME_LEN];
 
 void* main_thread_work(){
 
     char input[MAX_WORD_LEN];
     unsigned int len;
+    int filesArrayIndex = 0;
 
     struct file arguments[MAX_THREADS];         // max 20 arguments for 20 threads
     pthread_t threads[MAX_THREADS];             // max 20 threads
@@ -23,16 +26,23 @@ void* main_thread_work(){
         if(strcmp(token, "_count_") == 0){
             
             token = strtok(NULL, " ");
+            strcpy(filesArray[filesArrayIndex++], token);
             arguments[k].file_name = strdup(token); 
             arguments[k].mod_time = NULL;
             arguments[k].length = 0; 
-            //arguments[k] = (struct file) {token, NULL, 0};
             pthread_create(&threads[k], NULL, scanner_work, (void*) (arguments + k));
             k++;
 
         } else if(strcmp(token, "_stop_") == 0){
             exit_thread = 1;
             break;
+
+        } else if(strcmp(token, "_stopwords_") == 0){
+
+            token = strtok(NULL, " ");
+            if(token == NULL) continue;
+            char* stops_filename = token = strdup(token);
+            add_stopwords(stops_filename);
         }
         
         else {  
@@ -57,6 +67,39 @@ void* main_thread_work(){
     for(int i = 0; i < MAX_THREADS; i++){
         pthread_join(threads[i], NULL);
     }
+}
+
+void add_stopwords(char* filename){
+
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Failed to open file: %s\n", filename);
+        return;
+    }
+
+    char line[4096];
+    char word[MAX_WORD_LEN];
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+        int length = strlen(line);
+        if (line[length - 1] == '\n') {
+            line[length - 1] = '\0';                // Remove the newline character at the end
+        }
+
+        char* token = strtok(line, " ");
+        while (token != NULL) {
+            int i = 0;
+            while (token[i] != '\0') {
+                if (isalpha(token[i])) {
+                    stopwords_add_word(&stopWords, token, 1);
+                    break;
+                }
+                i++;
+            }
+            token = strtok(NULL, " ");
+        }
+    }
+
 }
 
 void *scanner_work(void *_args){
@@ -116,7 +159,7 @@ void go_through_file(char* filename, int prev_length){
         while (token != NULL) {
             int i = 0;
             while (token[i] != '\0') {
-                if (isalpha(token[i])) {
+                if (isalpha(token[i]) && stopwords_cointains(&stopWords, token) == 0) {
                     map_add_word(&temp_map, token, 1);
                     printf("REC %s\n", token);
                     break;
@@ -145,9 +188,11 @@ int main(){
 
     //init mutex
     pthread_mutex_init(&map_mutex, NULL);
+    pthread_mutex_init(&stopwords_mutex, NULL);
 
     //init the hash map
     map_init(&mapa);
+    map_init(&stopWords);
 
     //main thread
     pthread_t main_thread;
