@@ -89,13 +89,17 @@ void add_stopwords(char* filename){
         char* token = strtok(line, " ");
         while (token != NULL) {
             int i = 0;
+            int okay = 1;
             while (token[i] != '\0') {
                 if (isalpha(token[i])) {
-                    stopwords_add_word(&stopWords, token, 1);
+                    okay = 0;
                     break;
                 }
                 i++;
             }
+
+            if(okay)
+                stopwords_add_word(&stopWords, token, 1);
             token = strtok(NULL, " ");
         }
     }
@@ -114,7 +118,6 @@ void *scanner_work(void *_args){
     int prev_len = fileStat0.st_size;
 
     go_through_file(filename, 0);            // First time we go through the whole file
-    sleep(5);
 
     while (1) {
         if (exit_thread == 1)
@@ -158,20 +161,28 @@ void go_through_file(char* filename, int prev_length){
         char* token = strtok(line, " ");
         while (token != NULL) {
             int i = 0;
+            int okay = 1;
             while (token[i] != '\0') {
-                if (isalpha(token[i]) && stopwords_cointains(&stopWords, token) == 0) {
-                    map_add_word(&temp_map, token, 1);
-                    // printf("REC %s\n", token);
+                if (!isalpha(token[i]) && stopwords_cointains(&stopWords, token) == 0) {
+                    okay = 0;
                     break;
                 }
                 i++;
             }
+
+            if(okay && stopwords_cointains(&stopWords, token) == 0)
+                map_add_word(&temp_map, token, 1);
+
+            if (exit_thread == 1)
+                return;
+            
             token = strtok(NULL, " ");
         }
     }
 
     // Merge the temporary map with the main map
     merge_maps(&mapa, &temp_map);
+    sleep(5);
 }
 
 void merge_maps(HashMap* main_map, HashMap* temp_map) {

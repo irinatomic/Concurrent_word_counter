@@ -6,9 +6,6 @@
 #include <string.h>
 #include <unistd.h>
 
-// list of stop words
-#define MAX_STOPWORDS     INT8_MAX
-
 #define ARRAY_SIZE      5011
 
 typedef struct search_result {
