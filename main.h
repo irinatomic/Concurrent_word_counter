@@ -22,9 +22,6 @@ typedef struct file {
 // start of program
 extern void* main_thread_work();
 
-// stop words
-void add_stopwords(char* filename);
-
 // scanner thread
 extern void *scanner_work(void *_args);
 extern void go_through_file(char* filename, int prev_length);

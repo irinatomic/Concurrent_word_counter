@@ -201,6 +201,7 @@ int main(){
 
     //destroy mutex
     pthread_mutex_destroy(&map_mutex);
+    pthread_mutex_destroy(&stopwords_mutex);
 
     return 0;
 }
